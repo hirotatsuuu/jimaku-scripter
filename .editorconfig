@@ -1,0 +1,14 @@
+# 最上位の設定ファイルであることを指定
+root = true
+
+# すべてのファイル共通のルール
+[*]
+charset = utf-8             # 文字コードはUTF-8
+end_of_line = lf            # 改行コードはLFに統一
+insert_final_newline = true # ファイルの最後には必ず1行空白を入れる
+trim_trailing_whitespace = true # 行の終わりの無駄なスペースは自動削除
+
+# Pythonファイル固有のルール
+[*.py]
+indent_style = space        # インデントはスペース（タブ禁止）
+indent_size = 4             # スペースの数は4つ
