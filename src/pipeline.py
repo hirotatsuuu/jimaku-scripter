@@ -65,6 +65,7 @@ def run(args) -> None:
         # ---------------------------------------------------------
         tqdm.write("\n--- [2] 音声認識 (Whisper) ---")
         word_dict = load_word_dictionary(args.dict)
+        tqdm.write("[*] Whisper 音声認識処理を実行中...")
         try:
             raw_segments, whisper_time = run_whisper_transcribe(target_audio_file, word_dict, args.model)
         except Exception as e:
@@ -96,11 +97,13 @@ def run(args) -> None:
             # [工程 D] LLM 校正
             # ---------------------------------------------------------
             tqdm.write("\n--- [4] LLM 文脈校正 ---")
+            tqdm.write("[*] LLM 校正処理を実行中...")
             try:
                 llm_segments, llm_time = refine_context_with_llm(
                     current_segments, args.prompt, args.batch_size_llm
                 )
                 current_segments = llm_segments
+                tqdm.write(f"[+] LLM 校正処理 完了 (所要時間: {llm_time:.2f} 秒)")
                 
                 # LLM出力データの保存
                 save_segments_as_json(current_segments, paths["refined_json"])
@@ -117,7 +120,10 @@ def run(args) -> None:
                 # [工程 E] DeBERTa 穴埋め校正 (default, all 向け)
                 # ---------------------------------------------------------
                 tqdm.write("\n--- [5] DeBERTa 精度補強校正 ---")
-                proofread_segments = proofread_text(current_segments)
+                tqdm.write("[*] DeBERTa 校正処理を実行中...")
+
+                proofread_segments, deberta_time = proofread_text(current_segments)
+                tqdm.write(f"[+] DeBERTa 校正処理 完了 (所要時間: {deberta_time:.2f} 秒)")
                 pbar.update(1)
                 
                 # ---------------------------------------------------------
@@ -148,3 +154,10 @@ def run(args) -> None:
     tqdm.write("\n" + "="*50)
     tqdm.write(f"[*] すべての処理が完了しました！ 総所要時間: {time.perf_counter() - start_time:.2f} 秒")
     tqdm.write("="*50)
+
+    # 進捗バーがまだ100%に達していない場合、強制的に最大値まで進めて終了する
+    if 'pbar' in locals() and pbar is not None:
+        if pbar.n < pbar.total:
+            pbar.update(pbar.total - pbar.n)  # 残りのステップ数を一気に進める
+        pbar.refresh()                        # 画面表示を最新（100%）に更新
+        pbar.close()                          # 進捗バーの制御を安全に終了

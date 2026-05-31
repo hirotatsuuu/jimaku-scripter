@@ -16,6 +16,8 @@ dependencies = [
     "ollama>=0.4.0",            # ローカルLLM制御（頭脳）
     "budoux>=0.6.0",            # Google製の洗練された文節区切り（デザイナー）
     "tqdm>=4.66.0",             # 処理の進行状況をターミナルにプログレスバーで可視化する
+    "fugashi",
+    "unidic-lite"
 ]
 
 [project.scripts]
