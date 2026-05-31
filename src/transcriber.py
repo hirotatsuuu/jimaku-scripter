@@ -269,13 +269,32 @@ def run_whisper_transcribe(
 
         whisper_elapsed_time = time.perf_counter() - whisper_start_time  # 計測終了
 
-        return result.get("segments", []), whisper_elapsed_time
+        segments = result.get("segments", [])
+
+        total_words = 0
+        total_confidence = 0.0
+        
+        for seg in segments:
+            words = seg.get("words", [])
+            for w in words:
+                total_words += 1
+                # 確率(probability)が設定されていればそれを足す。未設定の場合は1.0(100%)とする
+                total_confidence += w.get("probability", 1.0)
+                
+        if total_words > 0:
+            avg_confidence = (total_confidence / total_words) * 100
+            tqdm.write(f"[*] 抽出された大セグメント数: {len(segments)} 個")
+            tqdm.write(f"[*] 抽出された詳細単語数: {total_words} 個")
+            tqdm.write(f"[*] 全体の平均確信度(精度予測): {avg_confidence:.1f}%")
+        else:
+            tqdm.write("[警告] 有効な単語が検出されませんでした。")
+        
+        return segments, whisper_elapsed_time
 
     except Exception as e:
         raise WhisperTranscribeError(
             f"Whisper 文字起こし処理中に予期せぬエラーが発生しました: {e}"
         ) from e
-
 
 # ------------------------------------------------------------------
 # フィラー除去

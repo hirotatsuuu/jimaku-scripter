@@ -1,21 +1,39 @@
 """
 formatter.py
-【第3工程：デザイナー】BudouX による文節分割と SRT ファイル書き出しを担当するモジュール。
+【整形工程】BudouX による文節分割を担当するモジュール。
 
 責務:
-  - LLM 校正済みセグメントを 10〜20 文字単位の行に分割（BudouX + タイムスタンプ比率推定）
-  - 分割した行データを SRT 規約に沿ったファイルとして書き出す
-  - 秒数を SRT タイムスタンプ形式（HH:MM:SS,mmm）に変換
-
-ファイルの書き込みは src/utils.py の write_text_file を経由します。
-例外は src/exceptions.py で定義したカスタム例外として送出します。
+  - AI校正済みセグメントを、人間が読みやすい文節（10〜20文字単位）のリストに分割する
+  - ファイルの書き出しは行わない（srtwriter.pyに委譲）
 """
 
-import os      # SRT ファイルの書き込み先ディレクトリ確認に使うライブラリ
 import budoux  # Google 製。日本語の文脈を解析し、テロップが不自然な位置で改行されないよう美しい文節区切りを計算するライブラリ
-from tqdm import tqdm  # tqdm.write を使って進捗バーを破壊せずにログを出力するためのライブラリ
+from tqdm import tqdm
 
-from src.exceptions import FileWriteError
+def format_segments_to_lines(
+    segments: list,
+    min_len: int,
+    max_len: int,
+) -> list[dict]:
+    """
+    全セグメントを結合・分割し、出力用の行データリストを作成します。
+    """
+    tqdm.write(f"[*] BudouXを利用して、人間が読みやすい位置での改行位置を計算します...")
+    
+    all_lines = []
+    
+    # 既存の _split_segment_to_lines 関数（ファイル内に定義されている想定）を呼び出し、
+    # 1つの平坦なリストにまとめます。
+    for segment in segments:
+        # ※ここには提示いただいた元の _split_segment_to_lines を内部関数として配置するか、
+        # 同一ファイル内で定義して呼び出します。
+        split_lines = _split_segment_to_lines(segment, min_len, max_len)
+        all_lines.extend(split_lines)
+        
+    tqdm.write(f"[*] 字幕の行分割が完了しました。総行数: {len(all_lines)} 行")
+    return all_lines
+
+# _split_segment_to_lines() の定義は、元の formatter.py からそのまま引き継ぎます。
 
 # ------------------------------------------------------------------
 # タイムスタンプの変換
