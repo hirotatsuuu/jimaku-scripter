@@ -256,14 +256,15 @@ LLM_MODEL_NAME  = "hf.co/mmnga/Llama-3-ELYZA-JP-8B-gguf"
 今日は寒いですね
 ```
 
-※ ほかに `output/text/` 、 `output/raw/` 、 `output/audio/` フォルダにファイルが生成される。
+※ ほかに `output/text/` , `output/raw/` , `output/audio/` フォルダにファイルが生成される。
 
 ### ファイル名に関して
  `_whisper` が付いたファイルは音声認識後のファイル
  `_refined` が付いたファイルはAI校正後のファイル
 
  ※ファイル名は同名のファイルがある場合は `_1` , `_2` のように数字を付与して出力される。
- ` sample_1_refined.srt`のようなファイル名になる。（※上書きされない）
+ 
+ `sample_1_refined.srt`のようなファイル名になる。（※上書きされない）
 
 ---
 
