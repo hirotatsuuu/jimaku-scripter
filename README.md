@@ -10,7 +10,7 @@
 6. Googleのテキスト分割ライブラリ `BudouX` により文節改行を行う。
 7. SRT形式のファイルを生成する。
 
-動画編集（Shotcut、DaVinci Resolve等）のテロップ作成に最適化されたSRT字幕ファイルを自動生成するPythonスクリプトです。
+動画編集（Shotcut、DaVinci Resolve等）時のテロップ作成に最適化されたSRT字幕ファイルを自動生成するPythonスクリプトです。（校正精度は自由に調整してください）
 
 ---
 
@@ -71,18 +71,19 @@ uv sync
 スクリプトをスムーズに動かすために、以下の構造でファイルを配置してください。
 
 ```text
+jimaku-scripter             #  プロジェクトフォルダ
 ├── src/                    #  ソースコードを格納するフォルダ
 │   ├── __init__.py         #  Pythonプロジェクトのデフォルト
 │   ├── exceptions.py       #  カスタム例外クラス
 │   ├── config.py           #  初期値など後から変更可能な設定ファイル
 │   ├── utils.py            #  汎用ユーティリティ関数
 │   ├── pipeline.py         #  全体のデータフローをコントロールする司令塔
-    ├── processor.py        #  1. 音声前処理：FFmpegで動画/音声を 16kHz WAV化
-    ├── transcriber.py      #  2. 音声認識：Whisperで文字起こし ＋ タイムスタンプ、確信度（重み）の抽出
-    ├── refiner.py          #  3. 校正：LLM（ELYZA）によりプロンプトから校正テキストを得る
-    ├── proofreader.py      #  4. 校正：DeBERTaで確信度の低い単語をMASK穴埋め修正
-    ├── aligner.py          #  5. 校正：動的計画法（DP）で修正後テキストとwhisperタイムスタンプを照合
-    ├── formatter.py        #  6. 整形：BudouXで整形、文字数カット、改行
+│   ├── processor.py        #  1. 音声前処理：FFmpegで動画/音声を 16kHz WAV化
+│   ├── transcriber.py      #  2. 音声認識：Whisperで文字起こし ＋ タイムスタンプ、確信度（重み）の抽出
+│   ├── refiner.py          #  3. 校正：LLM（ELYZA）によりプロンプトから校正テキストを得る
+│   ├── proofreader.py      #  4. 校正：DeBERTaで確信度の低い単語をMASK穴埋め修正
+│   ├── aligner.py          #  5. 校正：動的計画法（DP）で修正後テキストとwhisperタイムスタンプを照合
+│   ├── formatter.py        #  6. 整形：BudouXで整形、文字数カット、改行
 │   └── srtwriter.py        #  7. 出力：確定したテキストと時間を SRT 形式で書き出す
 ├── resources/              # プログラム内で使用する各種データフォルダ
 │   ├── sample/             # resourcesフォルダに格納するサンプルデータ      
@@ -117,17 +118,17 @@ uv sync
 
 ## 使い方
 
-プロジェクトのルートフォルダで実行してください。`uv` 環境であれば、手動で仮想環境に入り直す（Activateする）必要はありません。
+プロジェクトのルートフォルダで実行してください。
+`uv` 環境であれば、手動で仮想環境に入り直す（Activateする）必要はありません。
 
 ### 1. 基本的な実行方法（デフォルト設定）
 
 `./input/test.m4a` に音声ファイルを配置している場合、引数なしで実行するだけで自動的に文字起こしが始まり、`output`フォルダに成果物が出力されます。（計6ファイル生成される）
+引数が無い場合は `whisper -> DeBERTa -> DP -> BodouX -> SRT` という流れになります。（LLMは使用しない）
 
 ```powershell
 uv run jimaku-scripter
 ```
-
-引数が無い場合は `whisper -> DeBERTa -> DP -> BodouX -> SRT` という流れになります。（LLMは使用しない）
 
 ### 2. 特定の音声・動画ファイルを指定して実行
 
@@ -154,16 +155,16 @@ uv run jimaku-scripter --mode wsp
 ```
 
 ##### モードを指定する場合の処理一覧
-1. `default`（モードを指定しない）の場合
+1. `default`（モードを指定しない）の場合: 
     `whisper -> DeBERTa -> DP -> BodouX -> SRT` 
 
-2. `wps`の場合
+2. `wps`の場合: 
     `whisper -> BodouX -> SRT` 
 
-3. `llm`の場合
+3. `llm`の場合: 
     `whisper -> LLM(ELYZA) -> BodouX -> SRT` 
 
-4. `all`の場合
+4. `all`の場合: 
     `whisper -> LLM(ELYZA) -> DeBERTa -> DP -> BodouX -> SRT` 
 
 ※注意
@@ -197,9 +198,9 @@ tiny < base (デフォルト) < small < medium < large
 認識率を上げたい固有の単語やYouTubeのチャンネル名などがある場合は、`resources` フォルダ内に `dictionary.txt` を作成し、1行に1単語ずつ記述してください。登録された単語は、Whisperの初期プロンプトとして渡されます。
 
 ```text
-おたつ  #で始まる行はコメントです
-ユーラシア大陸
-自転車世界一周
+あああ  #で始まる行はコメントです
+いいいいい
+うううう
 ```
 
 ## フィラー語の登録（filler.txt）
@@ -248,20 +249,21 @@ LLM_MODEL_NAME  = "hf.co/mmnga/Llama-3-ELYZA-JP-8B-gguf"
 ```text
 1
 00:00:01,080 --> 00:00:02,560
-はいどうもおたつです
+こんにちは
 
 2
 00:00:03,140 --> 00:00:03,760
-前回ですね
+今日は寒いですね
 ```
 
-※ ほかに `text` フォルダ、 `raw` フォルダ、 `audio` フォルダにファイルが生成される。
+※ ほかに `output/text/` 、 `output/raw/` 、 `output/audio/` フォルダにファイルが生成される。
 
 ### ファイル名に関して
  `_whisper` が付いたファイルは音声認識後のファイル
  `_refined` が付いたファイルはAI校正後のファイル
 
- ※ファイル名は同名のファイルがある場合は `_1` , `_2` のように数字を付与して出力される（上書きされない）
+ ※ファイル名は同名のファイルがある場合は `_1` , `_2` のように数字を付与して出力される。
+ ` sample_1_refined.srt`のようなファイル名になる。（※上書きされない）
 
 ---
 
