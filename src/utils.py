@@ -236,20 +236,20 @@ def build_output_paths(input_file_path: str) -> dict:
         ensure_directory(target_dir)
 
     # 各出力ファイルのベースパスを生成する（まだ上書き防止処理はしていない）
+    # Whisper中間ファイルは「_wsp」、最終完成版は元の「stem（ファイル名）」そのままにします
     base_paths = {
-        "whisper_srt":      os.path.join(OUTPUT_SRT_DIR,        f"{stem}_whisper.srt"),
-        "whisper_json":     os.path.join(OUTPUT_TRANSCRIPT_DIR, f"{stem}_whisper.json"),
-        "whisper_txt":      os.path.join(OUTPUT_TEXT_DIR,       f"{stem}_whisper.txt"),
-        "refined_srt":      os.path.join(OUTPUT_SRT_DIR,        f"{stem}_refined.srt"),
-        "refined_json":     os.path.join(OUTPUT_TRANSCRIPT_DIR, f"{stem}_refined.json"),
-        "refined_txt":      os.path.join(OUTPUT_TEXT_DIR,       f"{stem}_refined.txt"),
+        "whisper_srt":      os.path.join(OUTPUT_SRT_DIR,        f"{stem}_wsp.srt"),
+        "whisper_json":     os.path.join(OUTPUT_TRANSCRIPT_DIR, f"{stem}_wsp.json"),
+        "whisper_txt":      os.path.join(OUTPUT_TEXT_DIR,       f"{stem}_wsp.txt"),
+        
+        "final_srt":        os.path.join(OUTPUT_SRT_DIR,        f"{stem}.srt"),
+        "final_json":       os.path.join(OUTPUT_TRANSCRIPT_DIR, f"{stem}.json"),
+        "final_txt":        os.path.join(OUTPUT_TEXT_DIR,       f"{stem}.txt"),
+        
         "extracted_audio":  os.path.join(OUTPUT_AUDIO_DIR,      f"{stem}_audio.m4a"),
     }
 
-    # 同名ファイルが存在する場合に末尾に _1, _2 を付与してユニークなパスにする
-    # whisper と refined のファイルは同一 stem から派生するため、
-    # どちらか一方のパスだけを get_unique_filepath() で決めて連番を統一する方針もあるが、
-    # ここでは各ファイル独立して連番を付与するシンプルな設計にしている。
+    # 同名ファイルが存在する場合は自動的に _1, _2 を付与して上書きを完全に防ぎます
     paths = {key: get_unique_filepath(path) for key, path in base_paths.items()}
 
     return paths

@@ -164,10 +164,12 @@ def proofread_text(segments: list) -> tuple[list, float]:
     # ・ 0.001 : 0.1%未満なら修正。文法的に絶対におかしいレベルの単語だけ直す（保守的）
     # =================================================================
     threshold = 0.05
+    
+    # max_char_diff=15 # この値も指定できる？
 
     start_time = time.perf_counter()  # 時間計測スタート
 
-    tqdm.write(f"[*] DeBERTaモデル ({DEBERTA_MODEL_NAME}) を読み込んでいます（初回はダウンロードに時間がかかります）...")
+    tqdm.write(f"[*] DeBERTaモデル ({DEBERTA_MODEL_NAME}) を読み込んでいます ...")
     
     try:
         # この処理の中でのみモデルを呼び出すことで、pipeline.py を綺麗に保ちます
@@ -188,12 +190,15 @@ def proofread_text(segments: list) -> tuple[list, float]:
         if original_text:
             # 内部関数 _proofread_single_text を呼び出して文字列を綺麗にする
             corrected_txt, masks_count = _proofread_single_text(
-                original_text, tokenizer, model, threshold
+                original_text,
+                tokenizer,
+                model,
+                threshold
             )
             seg["text"] = corrected_txt  # 綺麗になったテキストで上書き
             total_masks_in_all_segments += masks_count
 
-    tqdm.write(f"[+] DeBERTa校正完了。確信度不足により修正候補となった総単語数: {total_masks_in_all_segments} 個")
+    tqdm.write(f"[+] 確信度不足により修正候補となった総単語数: {total_masks_in_all_segments} 個")
     
     elapsed_time = time.perf_counter() - start_time  # 処理にかかった時間を計算
 

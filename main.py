@@ -21,13 +21,7 @@ from src.config import (
     MAX_CHAR_LEN
 )
 from src.pipeline import run
-"""
-処理のまとめ
 
-
-  
-  
-"""
 
 def main() -> None:
     """引数を解析してパイプラインを起動する関数"""
@@ -79,28 +73,33 @@ def main() -> None:
         help=f"LLM に一度に送るセグメント数（デフォルト: {BATCH_SIZE_LLM}）"
     )
     parser.add_argument(
-        "-f","--filler",  # 指定があればする、デフォルトではしない
-        action="store_true",  
-        help="フィラー除去処理をする" # 指定があればする、デフォルトではしない
+        "-f",
+        action="store_true",
+        dest="run_filler",  
+        help="フィラー除去処理をする"
     )
     parser.add_argument(
-        "--llm",  # 指定があればする、デフォルトではしない
+        "--llm",  
         action="store_true",
+        dest="run_llm",
         help="LLMによる校正をする"
     )
     parser.add_argument(
-        "--deberta",  # 指定があればする、デフォルトではしない
+        "--deberta",  
         action="store_true",
+        dest="run_deberta",
         help="DeBERTaによる校正をする"
     )
     parser.add_argument(
-        "--dp",  # 指定があればする、デフォルトではしない
+        "--dp",  
         action="store_true",
+        dest="run_dp",
         help="AIによる校正後にDP処理をする（必ず比較対象のAI校正後のテキストがある）"
     )
     parser.add_argument(
-        "--fa",  # 指定があればする、デフォルトではしない
+        "--fa",  
         action="store_true",
+        dest="run_fa",
         help="AIによる校正後にForced Alignment処理をする"
     )
     # 何も指定が無い場合は、音声ファイル➡Whisper音声認識➡SRTファイルの生成のみ

@@ -223,53 +223,35 @@ def _align_single_segment(source_words: list, refined_text: str) -> list[dict]:
             
     return aligned_result
 
-def align_text_and_timestamps(original_segments: list, refined_segments: list) -> list:
+def align_text_and_timestamps(source_words: list, refined_text: str) -> list[dict]:
     """
-    外部から呼び出される司令塔用関数。
-    複数の字幕データのリストを受け取り、1行ずつ切り出して同期処理を行います。
+    外部から呼び出されるアライメントのメイン関数。
+    1行分の「Whisperの単語時間データ」と「AI校正後の文字列」を受け取り、時間を同期します。
+    
+    Args:
+        source_words: [{"word": "明日の", "start": 0.0, "end": 1.0}, ...] のような時間データ
+        refined_text: "明日の天気は晴れです" のようなAI校正済みの文字列
+        
+    Returns:
+        同期が完了した [{"word": "明", "start":...}, {"word": "日", "start":...}, ...] のリスト
     """
-    import copy
-    aligned_segments = copy.deepcopy(refined_segments)
+    # 1. 校正後のテキストが空の場合はリストを空にして返す
+    if not refined_text.strip():
+        return []
 
-    # 全ての字幕セグメントを1行ずつ取り出してループ処理
-    for i in range(min(len(original_segments), len(aligned_segments))):
-        orig_seg = original_segments[i]
-        ref_seg = aligned_segments[i]
+    # 2. Whisperの元データに最初から単語時間が無い場合
+    if not source_words:
+        # 万が一時間が消失していたら、呼び出し元でセグメント枠の時間で代替するため、ここではエラーを投げる
+        raise AlignmentError("元データの単語タイムスタンプ(source_words)が存在しません。")
 
-        # 古い時間情報(words)と、新しいテキスト(text)を取り出す
-        source_words = orig_seg.get("words", [])
-        refined_text = ref_seg.get("text", "")
-
-        # 1. 校正後のテキストが空（スペースや記号のみになった等）の場合はリストを空にしてスキップ
-        if not refined_text.strip():
-            ref_seg["words"] = []
-            continue
-
-        # 2. Whisperの挙動等で最初から単語データが無い場合の警告と「正しい値」での代替処理
-        if not source_words:
-            seg_start = orig_seg.get("start", 0.0)
-            seg_end = orig_seg.get("end", 0.0)
-            tqdm.write(f"[警告] ID:{orig_seg.get('id', '?')} に単語時間が存在しません。セグメント時間({seg_start}〜{seg_end})を適用します。")
-            ref_seg["words"] = [{"word": refined_text, "start": seg_start, "end": seg_end}]
-            continue
-
-        try:
-            aligned_words = _align_single_segment(source_words, refined_text)
+    try:
+        # 3. 内部関数の _align_single_segment に処理を任せる（この関数は既にファイル内にあるはずです）
+        aligned_words = _align_single_segment(source_words, refined_text)
+        
+        if not aligned_words:
+            raise AlignmentError("時間同期の結果が空になりました。")
             
-            # 3. 同期処理の結果が何らかの理由で空になってしまった場合の警告と代替処理
-            if not aligned_words:
-                seg_start = orig_seg.get("start", 0.0)
-                seg_end = orig_seg.get("end", 0.0)
-                tqdm.write(f"[警告] ID:{orig_seg.get('id', '?')} の時間同期結果が空になりました。セグメント時間({seg_start}〜{seg_end})を適用します。")
-                ref_seg["words"] = [{"word": refined_text, "start": seg_start, "end": seg_end}]
-            else:
-                ref_seg["words"] = aligned_words
-                
-        except Exception as e:
-            # 4. エラー発生時の警告と代替処理
-            seg_start = orig_seg.get("start", 0.0)
-            seg_end = orig_seg.get("end", 0.0)
-            tqdm.write(f"[警告] ID:{orig_seg.get('id', '?')} の時間同期中にエラー({e})。セグメント時間で代替します。")
-            ref_seg["words"] = [{"word": refined_text, "start": seg_start, "end": seg_end}]
-
-    return aligned_segments
+        return aligned_words
+        
+    except Exception as e:
+        raise AlignmentError(f"時間同期中にエラーが発生しました: {e}")
