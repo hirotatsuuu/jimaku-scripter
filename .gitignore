@@ -15,7 +15,8 @@ env/
 # Whisperが初回実行時にダウンロードする学習済みモデルのキャッシュ（各自のPCに保存されるため不要）
 .cache/
 
-# output
+# 入力と出力のフォルダ
+input/
 output/
 
 # 外部ツール（ffmpeg）やスクリプトが生成した動画・音声データ
@@ -31,9 +32,12 @@ output/
 *.mp3
 *.wav
 
-# スクリプトが自動生成した字幕ファイル（SRT）
+# スクリプトが自動生成した字幕ファイル（SRT形式）
 *.srt
 
 # OSが自動生成する隠しファイル
 .DS_Store
 Thumbs.db
+
+# 任意対象外ファイル
+docs/project.md
