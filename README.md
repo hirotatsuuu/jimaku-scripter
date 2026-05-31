@@ -94,7 +94,7 @@ uv sync
 ├── output/                 # 変換後のデータフォルダ（※.gitignoreにより、大容量メディアはGit管理外）
 │   ├── srt/                # SRT形式で出力したファイルの格納（目的の字幕データ）
 │   ├── text/               # TXT形式で出力したファイルの格納（AIの出力のテキストデータ）
-│   └── transcript/         # JSON形式で出力したファイルの格納（AIの出力の生データ）
+│   └── raw/         # JSON形式で出力したファイルの格納（AIの出力の生データ）
 ├── docs/                   # マークダウン形式の書類の格納
 │   ├── uv_manual.md        # uvコマンドの解説・導入マニュアル
 │   ├── python_manual.md    # 通常の python / pip コマンドマニュアル

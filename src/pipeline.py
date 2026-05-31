@@ -203,7 +203,7 @@ def run(args) -> None:
                     min_char_len=args.min_char_len,  # main.py の引数から届いた値
                     max_char_len=args.max_char_len
                 )
-                save_segments_as_json(whisper_only_segments, paths["whisper_json"])  # transcript/ フォルダへ
+                save_segments_as_json(whisper_only_segments, paths["whisper_json"])  # raw/ フォルダへ
                 save_segments_as_plaintext(whisper_only_segments, paths["whisper_txt"]) # text/ フォルダへ
 
                 # Whisperの出力ファイル群
@@ -220,7 +220,7 @@ def run(args) -> None:
                         min_char_len=args.min_char_len,
                         max_char_len=args.max_char_len
                     )         
-                    save_segments_as_json(llm_refined_segments, paths["refined_json"])  # transcript/ フォルダへ
+                    save_segments_as_json(llm_refined_segments, paths["refined_json"])  # raw/ フォルダへ
                     save_segments_as_plaintext(llm_refined_segments, paths["refined_txt"]) # text/ フォルダへ
 
                     # LLMの出力ファイル群

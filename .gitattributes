@@ -29,3 +29,5 @@
 *.png binary
 *.jpg binary
 Thumbs.db binary
+
+docs/project.md

@@ -72,22 +72,17 @@ def main() -> None:
         dest="max_char_len",
         help=f"字幕 1 行あたりの最大文字数（デフォルト: {MAX_CHAR_LEN}）"
     ) 
+    # 以下パターンを分ける
     parser.add_argument(
-        "--llm",  #args.llmで取り出せる
-        action="store_true",  # 引数が指定されたらTrue、なければFalse
-        help="LLMによる文脈校正工程をしてBoduox字幕ファイルを出力する(DeBERTa + DP処理を行わない)"
+    "--mode",
+    choices=["default", "wsp", "llm", "all"],
+    default="default",  #  何も指定がない場合は自動的に default になる！
+    help="""実行モードを選択。
+            default: Whisper + DeBERTa + DP + BudouX処理を全て行いSRT出力,
+            wsp: Whisperで声認識をしてBudoux字幕ファイルを出力する（LLM,DeBERTa,DP処理をしない）,
+            llm: LLLMによる文脈校正工程をしてBoduox字幕ファイルを出力する(DeBERTa,DP処理をしない),
+            all: whisper + LLM + DeBERTa + DP + BudouX処理を全て行いSRT出力"""
     )
-    parser.add_argument(
-        "--wsp", 
-        action="store_true", 
-        help="Whisperによる声認識をBudouxからSRT出力する（すべての校正をしない）"
-    )
-    parser.add_argument(
-        "--all", 
-        action="store_true", 
-        help="whisper + LLM + DeBERTa + DP + BudouX処理を全て行いSRT出力"
-    )
-    # 何も指定が無い場合はLLMの処理はせず校正をしてSRT形式で出力する
 
     args = parser.parse_args()
 

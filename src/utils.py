@@ -208,10 +208,10 @@ def build_output_paths(input_file_path: str) -> dict:
 
     命名規則:
         - Whisper SRT  : output/srt/<stem>_whisper.srt
-        - Whisper JSON : output/transcript/<stem>_whisper.json
+        - Whisper JSON : output/raw/<stem>_whisper.json
         - Whisper TEXT : output/text/<stem>_whisper.txt
         - refined SRT  : output/srt/<stem>_refined.srt
-        - refined JSON : output/transcript/<stem>_refined.json
+        - refined JSON : output/raw/<stem>_refined.json
         - refined TEXT : output/text/<stem>_refined.txt
         - 抽出音声     : output/audio/<stem>_extracted.m4a
 
