@@ -29,8 +29,12 @@ from src.exceptions import (
     WhisperModelLoadError,
     WhisperTranscribeError,
 )
-from src.formatter import write_srt_file
-from src.refiner import refine_context_with_llm
+from src.utils import (
+    build_output_paths,
+    get_unique_filepath,
+    save_segments_as_json,
+    save_segments_as_plaintext,
+)
 from src.transcriber import (
     clean_fillers_keep_timing,
     extract_audio_from_video,
@@ -38,12 +42,17 @@ from src.transcriber import (
     load_word_dictionary,
     run_whisper_transcribe,
 )
-from src.utils import (
-    build_output_paths,
-    get_unique_filepath,
-    save_segments_as_json,
-    save_segments_as_plaintext,
-)
+from src.processor import process_audio           # 1. 音声前処理を行う関数（仮称）
+from src.transcriber import (
+    load_word_dictionary,
+    load_filler_list, 
+    transcribe_audio, 
+    remove_fillers
+)                                                   # 2. Whisper文字起こしを行う関数（既存）
+from src.proofreader import proofread_text       # 3. DeBERTaによるMASK校正を行う関数（仮称）
+from src.refiner import refine_context_with_llm  # 4. LLM（Ollama）による洗練を行う関数（既存）
+from src.aligner import align_text_and_timestamps # 5. DPマッチングで時間同期を行う関数
+from src.formatter import write_srt_file         # 6. BudouX整形とSRT書き出しを行う関数（既存）
 
 # 全体進捗バーで管理する 5 工程のラベル（ユーザーが変更するものではないためここで定義）
 _PIPELINE_STEPS = [
@@ -74,7 +83,7 @@ def run(args) -> None:
     """
     start_time = time.perf_counter()  # 総処理時間の計測開始
 
-    tqdm.write("[*] whisper-llm-srt を起動しました")
+    tqdm.write("[*] jimaku-scripter を起動しました")
 
         # クリーンアップ処理で参照するため、with ブロックの外で初期化しておく
     target_audio_file = args.input_file

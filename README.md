@@ -1,4 +1,4 @@
-# Whisper×ELYZA×BudouXでSRT字幕生成スクリプト
+# Whisper+DeBERTa+LLM(ELYZA)+BudouXによる字幕生成ツールSRT字幕生成スクリプト
 
 OpenAIの文字起こしAI「Whisper」を使用し、動画編集（Shotcut、DaVinci Resolve等）のテロップ作成に最適化されたSRT字幕ファイルを自動生成するPythonスクリプトです。
 
@@ -122,7 +122,7 @@ uv sync
 `./input/test.m4a` に音声ファイルを配置している場合、引数なしで実行するだけで自動的に文字起こしが始まり、`output`フォルダに成果物が出力されます。（計6ファイル生成される）
 
 ```powershell
-uv run whisper-llm-srt
+uv run jimaku-scripter
 ```
 
 ### 2. 特定の音声・動画ファイルを指定して実行
@@ -131,22 +131,22 @@ uv run whisper-llm-srt
 
 ```powershell
 # 特定の音声ファイルを指定
-uv run whisper-llm-srt ./input/audio.mp3
+uv run jimaku-scripter ./input/audio.mp3
 
 # 動画ファイルを指定して直接実行
-uv run whisper-llm-srt ./input/input_movie.mp4
+uv run jimaku-scripter ./input/input_movie.mp4
 
 # 超高精度モデル（large）を指定
-uv run whisper-llm-srt ./input/test.m4a -m large
+uv run jimaku-scripter ./input/test.m4a -m large
 
 # 別の単語辞書ファイルを指定
-uv run whisper-llm-srt ./input/test.m4a -d ./resources/sample/dict_sample.txt
+uv run jimaku-scripter ./input/test.m4a -d ./resources/sample/dict_sample.txt
 
 # 別のフィラーリストを指定
-uv run whisper-llm-srt ./input/test.m4a -f ./resources/sample/dict_sample.txt
+uv run jimaku-scripter ./input/test.m4a -f ./resources/sample/dict_sample.txt
 
 # LLMを使用せずWhisperのみで実行
-uv run whisper-llm-srt --no-llm
+uv run jimaku-scripter --no-llm
 ```
 
 ##### 指定可能なWhisperモデルサイズ

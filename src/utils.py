@@ -213,7 +213,7 @@ def build_output_paths(input_file_path: str) -> dict:
         - refined SRT  : output/srt/<stem>_refined.srt
         - refined JSON : output/transcript/<stem>_refined.json
         - refined TEXT : output/text/<stem>_refined.txt
-        - 抽出音声     : output/audio/<stem>_extracted.wav
+        - 抽出音声     : output/audio/<stem>_extracted.m4a
 
     Args:
         input_file_path: 入力ファイル（音声・動画）のパス。

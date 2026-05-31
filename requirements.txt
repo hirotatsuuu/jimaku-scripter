@@ -1,4 +1,4 @@
-# whisper-llm-srt 依存ライブラリ一覧
+# jimaku-scripter 依存ライブラリ一覧
 
 # 音声認識AI (OpenAI Whisper)
 openai-whisper

@@ -1,7 +1,7 @@
 [project]
-name = "whisper-llm-srt"
+name = "jimaku-scripter"
 version = "0.1.0"
-description = "Whisper × ローカルLLM(ELYZA) × BudouX による高精度・美レイアウト字幕生成ツール"
+description = "Whisper + DeBERTa + LLM(ELYZA) + BudouX による字幕生成ツール"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -11,14 +11,16 @@ authors = [
 # プロジェクトの実行に必要な外部ライブラリの定義
 dependencies = [
     "openai-whisper>=20240930", # 高精度音声認識（耳）
-    "ollama>=0.4.0",           # ローカルLLM制御（頭脳）
-    "budoux>=0.6.0",           # Google製の洗練された文節区切り（デザイナー）
-    "tqdm>=4.66.0",            # 処理の進行状況をターミナルにプログレスバーで可視化する
+    "transformers",             # Hugging FaceからAIモデルをダウンロード・操作するためのライブラリ
+    "torch",                    # 校正AIモデル（DeBERTa）のニューラルネットワーク計算を行うためのコアライブラリ
+    "ollama>=0.4.0",            # ローカルLLM制御（頭脳）
+    "budoux>=0.6.0",            # Google製の洗練された文節区切り（デザイナー）
+    "tqdm>=4.66.0",             # 処理の進行状況をターミナルにプログレスバーで可視化する
 ]
 
 [project.scripts]
-# 💡 「uv run whisper-llm-srt」と叩いた時に、main.py の main() 関数を実行する定義
-whisper-llm-srt = "main:main"
+# 💡 「uv run jimaku-scripter」と叩いた時に、main.py の main() 関数を実行する定義
+jimaku-scripter = "main:main"
 
 [build-system]
 requires = ["hatchling"]

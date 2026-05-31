@@ -24,9 +24,9 @@ from src.pipeline import run
 
 
 def main() -> None:
-    """引数を解析してパイプラインを起動する関数。処理の実体は src/pipeline.py にあります。"""
+    """引数を解析してパイプラインを起動する関数"""
     parser = argparse.ArgumentParser(
-        description="動画または音声ファイルからローカル LLM で校正され、10〜20 文字に最適化された SRT 字幕を出力するスクリプト"
+        description="音声ファイルを生成AIで最適化してSRT字幕を自動出力するスクリプト"
     )
     parser.add_argument(
         "input_file", 
@@ -72,12 +72,22 @@ def main() -> None:
         dest="max_char_len",
         help=f"字幕 1 行あたりの最大文字数（デフォルト: {MAX_CHAR_LEN}）"
     ) 
-    # --no-llm をつけて実行すると LLM 校正をスキップし、Whisper 生データのまま SRT を書き出します
     parser.add_argument(
-        "--no-llm", 
-        action="store_true", 
-        help="LLM による文脈校正工程をスキップする"
+        "--llm",  #args.llmで取り出せる
+        action="store_true",  # 引数が指定されたらTrue、なければFalse
+        help="LLMによる文脈校正工程をしてBoduox字幕ファイルを出力する(DeBERTa + DP処理を行わない)"
     )
+    parser.add_argument(
+        "--wsp", 
+        action="store_true", 
+        help="Whisperによる声認識をBudouxからSRT出力する（すべての校正をしない）"
+    )
+    parser.add_argument(
+        "--all", 
+        action="store_true", 
+        help="whisper + LLM + DeBERTa + DP + BudouX処理を全て行いSRT出力"
+    )
+    # 何も指定が無い場合はLLMの処理はせず校正をしてSRT形式で出力する
 
     args = parser.parse_args()
 
