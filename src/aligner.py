@@ -42,7 +42,7 @@ def calculate_dp_matrix(source: str, target: str) -> list[list[int]]:
                 dp[i][j] = min(
                     dp[i - 1][j - 1] + 1,  # 置換
                     dp[i - 1][j] + 1,      # 削除
-                    dp[j - 1] + 1          # 挿入
+                    dp[i][j - 1] + 1       # 挿入
                 )
     return dp
 
@@ -186,6 +186,16 @@ def _align_single_segment(source_words: list, refined_text: str) -> list[dict]:
     """
     【内部用】1つの字幕セグメントに対して、文字と時間を照合する処理
     """
+    # =================================================================
+    # 【疑似表示時間の設定】
+    # AIの校正によって「新しく挿入された文字」に対して割り振る、1文字あたりの疑似的な表示時間（秒）です。
+    # 
+    # ・ 0.05 : 標準的な設定。1文字あたり0.05秒（20文字で1秒分）のペースで字幕時間を進めます
+    # ・ 0.01 : 非常に短い時間。挿入された文字が詰まって一瞬だけ表示されるようになります
+    # ・ 0.10 : 少し長めの時間。挿入された文字が多い場合に、字幕の終了時間が後ろに伸びやすくなります
+    # =================================================================
+    inserted_char_duration = 0.05
+
     if not source_words or not refined_text.strip():
         return []
 
@@ -202,12 +212,13 @@ def _align_single_segment(source_words: list, refined_text: str) -> list[dict]:
                 "start": char_timestamps[i]["start"],
                 "end": char_timestamps[i]["end"]
             })
+        
         else:
             last_time = char_timestamps[-1]["end"] if char_timestamps else 0.0
             aligned_result.append({
                 "word": char,  # こちらも "word" に変更
                 "start": last_time,
-                "end": last_time + 0.05
+                "end": last_time + inserted_char_duration
             })
             
     return aligned_result

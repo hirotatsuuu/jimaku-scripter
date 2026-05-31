@@ -174,11 +174,25 @@ def run(args) -> None:
             # ② 【本番用】AI校正版のSRT出力 (wspモード以外の場合のみ)
             if args.mode in ["default", "all", "llm"]:
                 tqdm.write("[*] AI校正版 SRTファイルを生成中...")
-                # 読点や文字数に応じて美しく改行する処理
+
+                # 安全装置のコード
+                if not final_segments:
+                    tqdm.write("[警告] AI校正後のデータが空のため、Whisperのデータで代替して出力します。")
+                    final_segments = cleaned_segments
+
+                # 読点や文字数に応じて美しく改行する処理   
                 formatted_refined = format_segments_to_lines(
                     final_segments, args.min_char_len, args.max_char_len
                 )
                 write_srt_file(formatted_refined, paths["refined_srt"])
+
+                # AI校正版の生データ(raw)とテキスト(text)も確実に保存する
+                tqdm.write("[*] AI校正版の生データ(raw/text)を保存中...")
+                save_segments_as_json(final_segments, paths["refined_json"])
+                save_segments_as_plaintext(final_segments, paths["refined_txt"])
+
+
+
 
             pbar.update(1)
 
