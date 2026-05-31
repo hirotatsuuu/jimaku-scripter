@@ -50,7 +50,7 @@ def main() -> None:
         help="LLM プロンプト（prompt.txt）のパス"
     )
     parser.add_argument(
-        "-m", "--model",  
+        "--model",  
         default=DEFAULT_MODEL_SIZE,  
         help="Whisper のモデルサイズ指定（tiny/base/small/medium/large）"
     )
@@ -74,7 +74,7 @@ def main() -> None:
     ) 
     # 以下パターンを分ける
     parser.add_argument(
-    "--mode",
+    "-m", "--mode",
     choices=["default", "wsp", "llm", "all"],
     default="default",  #  何も指定がない場合は自動的に default になる！
     help="""実行モードを選択。

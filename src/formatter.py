@@ -18,7 +18,7 @@ def format_segments_to_lines(
     """
     全セグメントを結合・分割し、出力用の行データリストを作成します。
     """
-    tqdm.write(f"[*] BudouXを利用して、人間が読みやすい位置での改行位置を計算します...")
+    tqdm.write(f"[*] BudouXを利用して、改行位置を計算します...")
     
     all_lines = []
     

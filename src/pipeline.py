@@ -28,7 +28,7 @@ from src.srtwriter import write_srt_file
 def run(args) -> None:
     start_time = time.perf_counter()
     tqdm.write("="*50)
-    tqdm.write("[*] 字幕生成パイプラインを起動しました")
+    tqdm.write("[*] 字幕生成スクリプトを起動しました")
     tqdm.write(f"[*] 選択モード: {args.mode.upper()}")
     tqdm.write("="*50)
 
@@ -191,9 +191,6 @@ def run(args) -> None:
                 save_segments_as_json(final_segments, paths["refined_json"])
                 save_segments_as_plaintext(final_segments, paths["refined_txt"])
 
-
-
-
             pbar.update(1)
 
             # 進捗バーがまだ100%に達していない場合、強制的に最大値まで進めて終了する
@@ -201,23 +198,27 @@ def run(args) -> None:
                 if pbar.n < pbar.total:
                     pbar.update(pbar.total - pbar.n)  # 残りのステップ数を一気に進める
                 pbar.refresh()                        # 画面表示を最新（100%）に更新
-                pbar.close()                          # 進捗バーの制御を安全に終了
 
     finally:
         # ---------------------------------------------------------
         # [後始末クリーンアップ処理]
         # ---------------------------------------------------------
+        tqdm.write("\n--- [1] 音声後処理 ---")
+
         # エラーで異常終了した場合でも、必ずここを通過してファイルを消すか判断する
         if is_temp_audio and REMOVE_TEMP_AUDIO:
             try:
                 if os.path.exists(target_audio_file):
                     os.remove(target_audio_file)
-                    tqdm.write(f"\n[*] 設定(REMOVE_TEMP_AUDIO=True)に基づき、一時音声ファイルを削除しました: {target_audio_file}")
+                    tqdm.write(f"[*] 生成した音声ファイルを削除: {target_audio_file}")
             except OSError as e:
-                tqdm.write(f"\n[警告] 一時音声ファイルの削除中にエラーが発生しました: {e}")
+                tqdm.write(f"[警告] 一時音声ファイルの削除中にエラーが発生しました: {e}")
         elif is_temp_audio and not REMOVE_TEMP_AUDIO:
-            tqdm.write(f"\n[*] 設定(REMOVE_TEMP_AUDIO=False)に基づき、一時音声ファイルは保持されました: {target_audio_file}")
+            tqdm.write(f"[*] 生成した音声ファイルを保持: {target_audio_file}")
+
+    pbar.close()  # 進捗バーの制御を安全に終了
 
     tqdm.write("\n" + "="*50)
-    tqdm.write(f"[*] すべての処理が完了しました！ 総所要時間: {time.perf_counter() - start_time:.2f} 秒")
+    tqdm.write(f"[*] 字幕生成処理 完了 （総所要時間: {time.perf_counter() - start_time:.2f} 秒）")
+    tqdm.write("[*] 字幕生成スクリプトを終了しました")
     tqdm.write("="*50)

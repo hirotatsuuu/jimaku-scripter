@@ -51,7 +51,7 @@ def load_word_dictionary(file_path: str) -> list[str]:
     try:
         word_dict = read_lines_file(file_path)
         dict_filename = os.path.basename(file_path)
-        tqdm.write(f"[*] 単語辞書 [{dict_filename}] を読み込みました（登録数: {len(word_dict)} 語）")
+        tqdm.write(f"[*] 単語辞書を読み込みました。（登録数: {len(word_dict)} 語）: {dict_filename}")
         return word_dict
     except FileReadError as e:
         # 辞書は必須ではないため、読み込みエラーは警告にとどめて処理を継続する
@@ -71,6 +71,8 @@ def load_filler_list(file_path: str) -> list[str]:
     Returns:
         フィラー語の文字列リスト。ファイルが存在しない場合は空。
     """
+    tqdm.write("[*] フィラー処理を開始します...")
+
     if not file_path or not os.path.exists(file_path):
         tqdm.write(f"[*] 注意: フィラーリストが見つかりません: {file_path} ")
         return []
@@ -88,7 +90,7 @@ def load_filler_list(file_path: str) -> list[str]:
         tqdm.write(f"[*] 注意: フィラーリスト [{filler_filename}] が空です")
         return []
 
-    tqdm.write(f"[*] フィラーリスト [{filler_filename}] を読み込みました（登録数: {len(filler_list)} 語）")
+    tqdm.write(f"[*] フィラーリストを読み込みました。（登録数: {len(filler_list)} 語）: {filler_filename}")
     return filler_list
 
 
@@ -230,7 +232,7 @@ def run_whisper_transcribe(
         # 秒数を「X 分 Y 秒」形式に変換して表示する
         minutes = int(duration // 60)
         seconds = int(duration % 60)
-        tqdm.write(f"[*] 音声の長さ: {minutes} 分 {seconds} 秒（{duration:.1f} 秒）")
+        tqdm.write(f"[*] 音声の長さ: {duration:.2f} 秒")
     else:
         tqdm.write("[*] 音声の長さを取得できませんでした（処理は続行します）")
     
@@ -240,7 +242,7 @@ def run_whisper_transcribe(
     if word_dict:
         prompt_string = "。" + "、".join(word_dict) + "。"
 
-    tqdm.write(f"[*] Whisper モデル '{model_size}' をメモリに読み込み中...")
+    tqdm.write(f"[*] Whisper モデル {model_size} をメモリに読み込み中...")
     try:
         model = load_model(model_size)
     except MemoryError as e:
@@ -285,7 +287,7 @@ def run_whisper_transcribe(
             avg_confidence = (total_confidence / total_words) * 100
             tqdm.write(f"[*] 抽出された大セグメント数: {len(segments)} 個")
             tqdm.write(f"[*] 抽出された詳細単語数: {total_words} 個")
-            tqdm.write(f"[*] 全体の平均確信度(精度予測): {avg_confidence:.1f}%")
+            tqdm.write(f"[*] 全体の平均確信度(精度予測): {avg_confidence:.10f}%")
         else:
             tqdm.write("[警告] 有効な単語が検出されませんでした。")
         

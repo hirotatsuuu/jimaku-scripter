@@ -32,6 +32,7 @@ def process_audio(input_file: str, output_audio_path: str) -> str:
     Returns:
         Whisperに渡すべき最終的な音声ファイルのパス
     """
+    tqdm.write("[*] ffmpegによる音声変換処理を開始します...")
 
     # ログ出力が綺麗になるよう、Windows特有の「\」を「/」に統一する
     input_file_clean = input_file.replace("\\", "/")
@@ -40,10 +41,10 @@ def process_audio(input_file: str, output_audio_path: str) -> str:
     # 入力ファイルが既に m4a の場合、再変換をスキップして元のファイルをそのまま返す
     # メモ：サンプリングレートを16kHzに統一するため、音声ファイルであってもFFmpegを通したほうがよい
     if input_file_clean.lower().endswith(".m4a"):
-        tqdm.write(f"[*] 入力ファイルは既に m4a 形式です。前処理をスキップします: {input_file_clean}")
+        tqdm.write(f"[*] 入力ファイルは既に m4a 形式なので前処理をスキップします: {input_file_clean}")
         return input_file_clean, False  # False = 一時ファイルではない（元のファイル）
 
-    tqdm.write(f"[*] 音声前処理を開始します。入力ファイル: {input_file}")
+    tqdm.write(f"[*] 音声前処理対象ファイル: {input_file}")
     
     command = [
         "ffmpeg",
@@ -65,7 +66,7 @@ def process_audio(input_file: str, output_audio_path: str) -> str:
             stderr=subprocess.PIPE,
             check=True,
         )
-        tqdm.write(f"[*] 音声の最適化・抽出が完了しました。保存先: {output_audio_clean}")
+        tqdm.write(f"[*] 音声の最適化・抽出が完了しました: {output_audio_clean}")
         return output_audio_clean, True # True = この処理で一時的に生成したファイルである
 
     except subprocess.CalledProcessError as e:

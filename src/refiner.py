@@ -82,7 +82,7 @@ def load_prompt_template(file_path: str) -> str:
         )
 
     prompt_filename = file_path.split("/")[-1]
-    tqdm.write(f"[*] プロンプトテンプレート [{prompt_filename}] を読み込みました")
+    tqdm.write(f"[*] プロンプトテンプレートを読み込みました: {prompt_filename}")
     return template
 
 
