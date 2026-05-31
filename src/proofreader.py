@@ -5,11 +5,24 @@ proofreader.py
 """
 
 import os
-import logging
-# Hugging Faceの不要な警告文（トークン未設定など）を非表示にする設定
+import warnings
+
+# 環境変数での警告抑制
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
-logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+
+# ★追加: Pythonの警告システムを使って、Hugging Face絡みのWarningを根こそぎ無視する
+warnings.filterwarnings("ignore", category=UserWarning, module="huggingface_hub.*")
+warnings.filterwarnings("ignore", message=".*unauthenticated requests.*")
+warnings.filterwarnings("ignore", message=".*HF_TOKEN.*")
+
+import logging
+# さらにロガーの出力レベルもエラーのみに絞る
+try:
+    from huggingface_hub.utils import logging as hf_logging
+    hf_logging.set_verbosity_error()
+except Exception:
+    pass
 
 import copy
 import time  # 処理時間計測用に追加
@@ -138,5 +151,5 @@ def proofread_text(segments: list, threshold: float = 0.7) -> list:
     tqdm.write(f"[+] DeBERTa校正完了。確信度不足により修正候補となった総単語数: {total_masks_in_all_segments} 個")
     
     elapsed_time = time.perf_counter() - start_time  # 処理にかかった時間を計算
-    
+
     return corrected_segments, elapsed_time  # セグメントデータと一緒にかかった時間も返す

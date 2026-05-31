@@ -1,6 +1,6 @@
 """
 processor.py
-【前処理工程】動画や音声ファイルから、AIが処理しやすい形式（16kHz m4a/wav等）に変換するモジュール。
+【前処理工程】動画や音声ファイルから、AIが処理しやすい形式（16kHz m4a）に変換するモジュール。
 
 責務:
   - 入力ファイルが動画かどうかを判定する
@@ -32,8 +32,17 @@ def process_audio(input_file: str, output_audio_path: str) -> str:
     Returns:
         Whisperに渡すべき最終的な音声ファイルのパス
     """
-    # 既に変換処理が必要ない音声ファイルの場合は、そのまま返すことも可能ですが
-    # ここではサンプリングレートを16kHzに統一するため、音声ファイルであってもFFmpegを通します。
+
+    # ログ出力が綺麗になるよう、Windows特有の「\」を「/」に統一する
+    input_file_clean = input_file.replace("\\", "/")
+    output_audio_clean = output_audio_path.replace("\\", "/")
+
+    # 入力ファイルが既に m4a の場合、再変換をスキップして元のファイルをそのまま返す
+    # メモ：サンプリングレートを16kHzに統一するため、音声ファイルであってもFFmpegを通したほうがよい
+    if input_file_clean.lower().endswith(".m4a"):
+        tqdm.write(f"[*] 入力ファイルは既に m4a 形式です。前処理をスキップします: {input_file_clean}")
+        return input_file_clean, False  # False = 一時ファイルではない（元のファイル）
+
     tqdm.write(f"[*] 音声前処理を開始します。入力ファイル: {input_file}")
     
     command = [
@@ -56,8 +65,8 @@ def process_audio(input_file: str, output_audio_path: str) -> str:
             stderr=subprocess.PIPE,
             check=True,
         )
-        tqdm.write(f"[*] 音声の最適化・抽出が完了しました。保存先: {output_audio_path}")
-        return output_audio_path
+        tqdm.write(f"[*] 音声の最適化・抽出が完了しました。保存先: {output_audio_clean}")
+        return output_audio_clean, True # True = この処理で一時的に生成したファイルである
 
     except subprocess.CalledProcessError as e:
         # FFmpegの実行が失敗した場合（ファイルが壊れているなど）

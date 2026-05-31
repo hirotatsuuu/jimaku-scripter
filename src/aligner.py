@@ -9,6 +9,7 @@ aligner.py
 - ゼロ除算や負の時間計算の徹底排除
 """
 
+from tqdm import tqdm
 from src.exceptions import WhisperSrtBaseError
 
 class AlignmentError(WhisperSrtBaseError):
@@ -228,14 +229,36 @@ def align_text_and_timestamps(original_segments: list, refined_segments: list) -
         source_words = orig_seg.get("words", [])
         refined_text = ref_seg.get("text", "")
 
+        # 1. 校正後のテキストが空（スペースや記号のみになった等）の場合はリストを空にしてスキップ
+        if not refined_text.strip():
+            ref_seg["words"] = []
+            continue
+
+        # 2. Whisperの挙動等で最初から単語データが無い場合の警告と「正しい値」での代替処理
+        if not source_words:
+            seg_start = orig_seg.get("start", 0.0)
+            seg_end = orig_seg.get("end", 0.0)
+            tqdm.write(f"[警告] ID:{orig_seg.get('id', '?')} に単語時間が存在しません。セグメント時間({seg_start}〜{seg_end})を適用します。")
+            ref_seg["words"] = [{"word": refined_text, "start": seg_start, "end": seg_end}]
+            continue
+
         try:
-            # 新たに作った1行専用の同期関数に渡す
             aligned_words = _align_single_segment(source_words, refined_text)
-            ref_seg["words"] = aligned_words
-        except Exception:
-            # 万が一変な文字が入っていてエラーが起きても全体を止めず、
-            # この行だけ「元の時間」をそのまま採用して安全にスキップする
-            ref_seg["start"] = orig_seg.get("start", ref_seg.get("start"))
-            ref_seg["end"] = orig_seg.get("end", ref_seg.get("end"))
+            
+            # 3. 同期処理の結果が何らかの理由で空になってしまった場合の警告と代替処理
+            if not aligned_words:
+                seg_start = orig_seg.get("start", 0.0)
+                seg_end = orig_seg.get("end", 0.0)
+                tqdm.write(f"[警告] ID:{orig_seg.get('id', '?')} の時間同期結果が空になりました。セグメント時間({seg_start}〜{seg_end})を適用します。")
+                ref_seg["words"] = [{"word": refined_text, "start": seg_start, "end": seg_end}]
+            else:
+                ref_seg["words"] = aligned_words
+                
+        except Exception as e:
+            # 4. エラー発生時の警告と代替処理
+            seg_start = orig_seg.get("start", 0.0)
+            seg_end = orig_seg.get("end", 0.0)
+            tqdm.write(f"[警告] ID:{orig_seg.get('id', '?')} の時間同期中にエラー({e})。セグメント時間で代替します。")
+            ref_seg["words"] = [{"word": refined_text, "start": seg_start, "end": seg_end}]
 
     return aligned_segments

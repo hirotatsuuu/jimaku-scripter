@@ -109,6 +109,14 @@ def _split_segment_to_lines(
     full_text = segment.get("text", "").replace("、", "").replace("。", "").strip()
     if not full_text or not words_info:
         return []
+    
+    # 万が一ここまで来て単語レベルの時間が消えていた場合、勝手な値を入れるのではなく
+    # セグメント自体が持っている本来の開始・終了時間を使う
+    if not words_info:
+        seg_start = float(segment.get("start", 0.0))
+        seg_end = float(segment.get("end", 0.0))
+        tqdm.write(f"[警告] formatter: 単語レベルの時間が消失したため、セグメント時間({seg_start}〜{seg_end})を適用します。")
+        words_info = [{"start": seg_start, "end": seg_end}]
 
     # BudouX の日本語解析デフォルトモデルをメモリに読み込み（文章を美しい文節単位にチョップする準備）
     _budoux_parser = budoux.load_default_japanese_parser()

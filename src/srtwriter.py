@@ -40,6 +40,10 @@ def write_srt_file(formatted_lines: list, output_srt_path: str) -> None:
         formatted_lines: [{"text": "字幕テキスト", "start": 0.0, "end": 2.5}, ...] の形式のリスト
         output_srt_path: 保存先のSRTファイルパス
     """
+    # 追加した安全装置：書き込むべきデータが空の場合は、空のファイルを作らずに警告を出す
+    if not formatted_lines:
+        tqdm.write(f"[警告] SRTに書き込むデータが空のため、出力をスキップしました: {output_srt_path}")
+        return
     tqdm.write(f"[*] SRTファイルの生成を開始します。書き出し先: {output_srt_path}")
     
     try:
