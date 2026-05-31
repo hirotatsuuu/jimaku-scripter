@@ -14,14 +14,20 @@ from src.config import (
     DEFAULT_AUDIO_FILE,
     DEFAULT_DICT_FILE,
     DEFAULT_FILLER_FILE,
-    DEFAULT_MODEL_SIZE,
     DEFAULT_PROMPT_FILE,
+    DEFAULT_MODEL_SIZE,
     BATCH_SIZE_LLM,
     MIN_CHAR_LEN,
     MAX_CHAR_LEN
 )
 from src.pipeline import run
+"""
+処理のまとめ
 
+
+  
+  
+"""
 
 def main() -> None:
     """引数を解析してパイプラインを起動する関数"""
@@ -35,17 +41,17 @@ def main() -> None:
         help="入力ファイル（動画または音声）のパス"
     )
     parser.add_argument(
-        "-d", "--dict",
+        "--dict",
         default=DEFAULT_DICT_FILE,
         help="優先単語リスト（dictionary.txt）のパス"
     )
     parser.add_argument(
-        "-f", "--filler",
+        "--filler",
         default=DEFAULT_FILLER_FILE,
         help="フィラーリスト（filler.txt）のパス"
     )
     parser.add_argument(
-        "-p", "--prompt", 
+        "--prompt", 
         default=DEFAULT_PROMPT_FILE, 
         help="LLM プロンプト（prompt.txt）のパス"
     )
@@ -53,12 +59,6 @@ def main() -> None:
         "--model",  
         default=DEFAULT_MODEL_SIZE,  
         help="Whisper のモデルサイズ指定（tiny/base/small/medium/large）"
-    )
-    parser.add_argument(
-        "-b", "--batch-size",
-        type=int, default=BATCH_SIZE_LLM,
-        dest="batch_size_llm",
-        help=f"LLM に一度に送るセグメント数（デフォルト: {BATCH_SIZE_LLM}）"
     )
     parser.add_argument(
         "-min", "--min-chars",
@@ -72,17 +72,38 @@ def main() -> None:
         dest="max_char_len",
         help=f"字幕 1 行あたりの最大文字数（デフォルト: {MAX_CHAR_LEN}）"
     ) 
-    # 以下パターンを分ける
     parser.add_argument(
-    "-m", "--mode",
-    choices=["default", "wsp", "llm", "all"],
-    default="default",  #  何も指定がない場合は自動的に default になる！
-    help="""実行モードを選択。
-            default: Whisper + DeBERTa + DP + BudouX処理を全て行いSRT出力,
-            wsp: Whisperで声認識をしてBudoux字幕ファイルを出力する（LLM,DeBERTa,DP処理をしない）,
-            llm: LLLMによる文脈校正工程をしてBoduox字幕ファイルを出力する(DeBERTa,DP処理をしない),
-            all: whisper + LLM + DeBERTa + DP + BudouX処理を全て行いSRT出力"""
+        "--batch-size",
+        type=int, default=BATCH_SIZE_LLM,
+        dest="batch_size_llm",
+        help=f"LLM に一度に送るセグメント数（デフォルト: {BATCH_SIZE_LLM}）"
     )
+    parser.add_argument(
+        "-f","--filler",  # 指定があればする、デフォルトではしない
+        action="store_true",  
+        help="フィラー除去処理をする" # 指定があればする、デフォルトではしない
+    )
+    parser.add_argument(
+        "--llm",  # 指定があればする、デフォルトではしない
+        action="store_true",
+        help="LLMによる校正をする"
+    )
+    parser.add_argument(
+        "--deberta",  # 指定があればする、デフォルトではしない
+        action="store_true",
+        help="DeBERTaによる校正をする"
+    )
+    parser.add_argument(
+        "--dp",  # 指定があればする、デフォルトではしない
+        action="store_true",
+        help="AIによる校正後にDP処理をする（必ず比較対象のAI校正後のテキストがある）"
+    )
+    parser.add_argument(
+        "--fa",  # 指定があればする、デフォルトではしない
+        action="store_true",
+        help="AIによる校正後にForced Alignment処理をする"
+    )
+    # 何も指定が無い場合は、音声ファイル➡Whisper音声認識➡SRTファイルの生成のみ
 
     args = parser.parse_args()
 

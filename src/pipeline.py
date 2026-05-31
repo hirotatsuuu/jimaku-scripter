@@ -3,10 +3,11 @@ pipeline.py
 全体のデータフローをコントロールする司令塔。
 
 責務:
-  - モードごとの処理分岐（default, wsp, llm, all）
+  - 実行時引数ごとの処理分岐（default, filler, llm, deberta, dp, fa）
   - 各モジュールの呼び出しとデータの中継ぎ
   - 全体進捗バー（tqdm）の管理とコンソールへのログ出力
-  - 各工程完了ごとの中間ファイル（JSON, TXT）の保存
+  - Whisperファイルの保存（text, raw, srt）と完成したファイルの保存（text, raw, srt）
+    （デフォルト（実行時引数無し）の場合は3ファイルのみだが、実行時引数がる場合は6ファイルになる）
 """
 
 import os
@@ -164,6 +165,7 @@ def run(args) -> None:
             
             # 【比較用】Whisper生データ（AI校正前）のSRT出力
             tqdm.write("[*] Whisper版 SRTファイルを生成中...")
+        
             # (cleaned_segments には フィラー除去直後 のデータが安全に保管されています)
             # 読点や文字数に応じて美しく改行する処理
             formatted_whisper = format_segments_to_lines(

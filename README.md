@@ -142,7 +142,7 @@ uv run jimaku-scripter ./input/audio.mp3
 uv run jimaku-scripter ./input/sample.mp4
 
 # 超高精度モデル（large）を指定
-uv run jimaku-scripter ./input/test.m4a -m large
+uv run jimaku-scripter ./input/test.m4a -model large
 
 # 別の単語辞書ファイルを指定
 uv run jimaku-scripter ./input/test.m4a -d ./resources/sample/dict_sample.txt
